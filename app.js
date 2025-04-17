@@ -11,6 +11,8 @@ mongoose.connect('mongodb+srv://Yukitora:YuKiT0rA@cluster0.qmczwk6.mongodb.net/?
 
 const app = express();
 
+app.use(express.json());
+
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -18,7 +20,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/book', bookRoutes);
+
+app.use('/api/books', bookRoutes);
 app.use('/api/auth', userRoutes)
 
 module.exports = app;
