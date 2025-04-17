@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bookRoutes = require('./routes/Book')
 const userRoutes = require('./routes/User')
+const path = require('path');
 
 mongoose.connect('mongodb+srv://Yukitora:YuKiT0rA@cluster0.qmczwk6.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0',
   { useNewUrlParser: true,
@@ -22,6 +23,7 @@ app.use((req, res, next) => {
 
 
 app.use('/api/books', bookRoutes);
-app.use('/api/auth', userRoutes)
+app.use('/api/auth', userRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 module.exports = app;
