@@ -10,6 +10,8 @@ router.get('/', auth, bookCtrl.getAllBook);
 router.get('/:id', auth, bookCtrl.getOneBook);
 router.put('/:id', auth, bookCtrl.modifyBook);
 router.delete('/:id', auth, bookCtrl.deleteBook);
+router.post('/:id/rating', auth, bookCtrl.ratingBook);
+router.get('/bestrating', auth, bookCtrl.getBestRatingBook);
   
 
 module.exports = router;
