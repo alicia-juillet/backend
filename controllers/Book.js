@@ -1,4 +1,5 @@
-const Book = require('../models/Book')
+const Book = require('../models/Book');
+const fs = require('fs');
 
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
@@ -8,10 +9,9 @@ exports.createBook = (req, res, next) => {
       ...bookObject,
       userId: req.auth.userId,
       imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
-      
+      averageRating: 0,
+      ratings: []
   });
-  console.log('bookObject:', bookObject);
-  console.log('req.file:', req.file);
   book.save()
   .then(() => { res.status(201).json({message: 'Livre enregistré !'})})
   .catch(error => { res.status(400).json( { error })})
@@ -37,6 +37,17 @@ exports.modifyBook = (req, res, next) => {
       }
       if (book.userId !== req.auth.userId) {
         return res.status(403).json({ error: 'Requête non autorisée.' });
+      }
+      let bookObject = {};
+      if (req.file) {
+        const filename = book.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, () => {});
+        bookObject = {
+          ...JSON.parse(req.body.book),
+          imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+        };
+      } else {
+        bookObject = { ...req.body };
       }
       Book.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
         .then(() => res.status(200).json({ message: 'Livre modifié !' }))
