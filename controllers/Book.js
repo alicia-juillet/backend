@@ -1,21 +1,41 @@
 const Book = require('../models/Book');
 const fs = require('fs');
-
+const sharp = require('sharp');
+const path = require('path');
 
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   delete bookObject._id;
   delete bookObject._userId;
+
+  const filePath = path.join(__dirname, '../images', req.file.filename);
+  const originalname = req.file.originalname;
+  const timestamp = Date.now()
+  const ref = `${timestamp}-${originalname.substring(0, originalname.lastIndexOf('.'))}.webp`;
+
+  sharp(filePath)
+    .webp({ quality: 20 })
+    .toFile(path.join(__dirname, '../images', ref), (err, info) => {
+      if (err) {
+        return res.status(400).json({ error: 'Erreur lors de la conversion de l\'image.' });
+      }
+      fs.unlink(filePath, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error('Erreur lors de la suppression de l\'image d\'origine:', unlinkErr);
+        }
+      });
+
       const book = new Book({
         ...bookObject,
         userId: req.auth.userId,
-        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${ref}`,
       });
 
       book.save()
         .then(() => res.status(201).json({ message: 'Livre enregistré !' }))
         .catch(error => res.status(400).json({ error }));
-    };
+    });
+};
   
 exports.getAllBook = (req, res, next) => {
     Book.find()
